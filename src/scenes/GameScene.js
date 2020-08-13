@@ -1,9 +1,11 @@
 import Phaser from 'phaser'
 import ScoreLabel from '../ui/ScoreLabel'
+import CovidSpawner from './CovidSpawner'
 
 const GROUND_KEY = 'ground'
 const CSOKA_KEY = 'csoka'
 const BANANA_KEY = 'banana'
+const COVID_KEY = 'covid'
 
 export default class GameScene extends Phaser.Scene {
     constructor() {
@@ -12,13 +14,19 @@ export default class GameScene extends Phaser.Scene {
         this.player = undefined
         this.cursors = undefined
         this.scoreLabel = undefined
+        this.bananas = undefined
+        this.covidSpawner = undefined
+
+        this.gameOver = false
     }
+
 
     preload() {
         this.load.image('sky', 'assets/sky.png')
         this.load.image(GROUND_KEY, 'assets/platform.png')
         this.load.image(BANANA_KEY, 'assets/banana.png')
-        this.load.image('covid', 'assets/covid1.png')
+        this.load.image(COVID_KEY, 'assets/covid1.png')
+
 
         this.load.spritesheet(CSOKA_KEY, 'assets/csoka-dude.png', {
             frameWidth: 32,
@@ -26,24 +34,37 @@ export default class GameScene extends Phaser.Scene {
         })
     }
 
+
+
     create() {
         this.add.image(400, 300, 'sky')
 
         const platforms = this.createPlatforms()
         this.player = this.createPlayer()
-        const bananas = this.createBananas()
+        this.bananas = this.createBananas()
 
         this.scoreLabel = this.createScoreLabel(16, 16, 0)
 
-        this.physics.add.collider(this.player, platforms)
-        this.physics.add.collider(bananas, platforms)
+        this.covidSpawner = new CovidSpawner(this, COVID_KEY)
+        const covidGroup = this.covidSpawner.group
 
-        this.physics.add.overlap(this.player, bananas, this.collectBanana, null, this)
+        this.physics.add.collider(this.player, platforms)
+        this.physics.add.collider(this.bananas, platforms)
+        this.physics.add.collider(covidGroup, platforms)
+        this.physics.add.collider(this.player, covidGroup, this.hitCovid, null, this)
+
+        this.physics.add.overlap(this.player, this.bananas, this.collectBanana, null, this)
 
         this.cursors = this.input.keyboard.createCursorKeys()
+
+
     }
 
     update() {
+        if (this.gameOver) {
+            return
+        }
+
         if (this.cursors.left.isDown) {
             this.player.setVelocityX(-160)
 
@@ -137,6 +158,16 @@ export default class GameScene extends Phaser.Scene {
         banana.disableBody(true, true)
 
         this.scoreLabel.add(10)
+
+        console.log(this.bananas);
+
+        if (this.bananas.countActive(true) === 0) {
+            this.bananas.children.iterate((child) => {
+                child.enableBody(true, child.x, 0, true, true)
+            })
+        }
+
+        this.covidSpawner.spawn(player.x)
     }
 
     createScoreLabel(x, y, score) {
@@ -149,5 +180,15 @@ export default class GameScene extends Phaser.Scene {
         this.add.existing(label)
 
         return label
+    }
+
+    hitCovid(player, covid) {
+        this.physics.pause()
+
+        player.setTint(0Xff0000)
+
+        player.anims.play('turn')
+        
+        this.gameOver = true
     }
 }
