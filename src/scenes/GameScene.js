@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 
 const GROUND_KEY = 'ground'
 const CSOKA_KEY = 'csoka'
+const BANANA_KEY = 'banana'
 
 export default class GameScene extends Phaser.Scene {
     constructor() {
@@ -14,7 +15,7 @@ export default class GameScene extends Phaser.Scene {
     preload() {
         this.load.image('sky', 'assets/sky.png')
         this.load.image(GROUND_KEY, 'assets/platform.png')
-        this.load.image('banana', 'assets/banana.png')
+        this.load.image(BANANA_KEY, 'assets/banana.png')
         this.load.image('covid', 'assets/covid1.png')
 
         this.load.spritesheet(CSOKA_KEY, 'assets/csoka-dude.png', {
@@ -28,8 +29,12 @@ export default class GameScene extends Phaser.Scene {
 
         const platforms = this.createPlatforms()
         this.player = this.createPlayer()
+        const bananas = this.createBananas()
 
         this.physics.add.collider(this.player, platforms)
+        this.physics.add.collider(bananas, platforms)
+
+        this.physics.add.overlap(this.player, bananas, this.collectBanana, null, this)
 
         this.cursors = this.input.keyboard.createCursorKeys()
     }
@@ -103,5 +108,28 @@ export default class GameScene extends Phaser.Scene {
         })
 
         return player
+    }
+
+    createBananas() {
+        
+        const bananas = this.physics.add.group({
+            key: BANANA_KEY,
+            repeat: 11,
+            setXY: {
+                x: 12,
+                y: 0, 
+                stepX: 70
+            }
+        })
+
+        bananas.children.iterate((child) => {
+            child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8))
+        })
+
+        return bananas
+    }
+
+    collectBanana(player, banana) {
+        banana.disableBody(true, true)
     }
 }
