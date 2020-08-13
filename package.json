@@ -1,5 +1,5 @@
 {
-	"name": "phaser3-parcel-template",
+	"name": "js-phaser3",
 	"version": "1.0.0",
 	"description": "A template project for Phaser3 using Parceljs",
 	"scripts": {
@@ -24,6 +24,8 @@
 		"parcel-plugin-static-files-copy": "^2.4.3"
 	},
 	"dependencies": {
+		"http-server": "^0.12.3",
+		"node": "^14.8.0",
 		"phaser": "^3.24.1"
 	},
 	"parcelCleanPaths": [
