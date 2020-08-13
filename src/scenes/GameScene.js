@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import ScoreLabel from '../ui/ScoreLabel'
 
 const GROUND_KEY = 'ground'
 const CSOKA_KEY = 'csoka'
@@ -10,6 +11,7 @@ export default class GameScene extends Phaser.Scene {
 
         this.player = undefined
         this.cursors = undefined
+        this.scoreLabel = undefined
     }
 
     preload() {
@@ -30,6 +32,8 @@ export default class GameScene extends Phaser.Scene {
         const platforms = this.createPlatforms()
         this.player = this.createPlayer()
         const bananas = this.createBananas()
+
+        this.scoreLabel = this.createScoreLabel(16, 16, 0)
 
         this.physics.add.collider(this.player, platforms)
         this.physics.add.collider(bananas, platforms)
@@ -131,5 +135,19 @@ export default class GameScene extends Phaser.Scene {
 
     collectBanana(player, banana) {
         banana.disableBody(true, true)
+
+        this.scoreLabel.add(10)
+    }
+
+    createScoreLabel(x, y, score) {
+        const style = {
+            fontSize: '32px',
+            fill: '#000'
+        }
+        const label = new ScoreLabel(this, x, y, score, style)
+
+        this.add.existing(label)
+
+        return label
     }
 }
