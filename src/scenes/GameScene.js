@@ -159,15 +159,17 @@ export default class GameScene extends Phaser.Scene {
 
         this.scoreLabel.add(10)
 
-        console.log(this.bananas);
-
         if (this.bananas.countActive(true) === 0) {
-            this.bananas.children.iterate((child) => {
+            this.bananas.children.iterate((c) => {
+                /** @type {Phaser.GameObject.Sprite} */
+                const child = c
+                console.log(child)
                 child.enableBody(true, child.x, 0, true, true)
             })
+            this.covidSpawner.spawn(player.x)
         }
 
-        this.covidSpawner.spawn(player.x)
+        
     }
 
     createScoreLabel(x, y, score) {
